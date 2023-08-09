@@ -2,7 +2,7 @@
 const gameBoard = document.getElementById('game-board');
 const paddle = document.getElementById('paddle');
 const ball = document.getElementById('ball');
-const scoreDisplay = document.getElementById('score');
+let scoreDisplay = document.getElementById('score');
 const livesDisplay = document.getElementById('lives');
 const timerDisplay = document.getElementById('timer');
 
@@ -99,19 +99,19 @@ function update(deltaTime) {
     for (let i = 0; i < bricks.length; i++){
         if
         (
-            (ballCurrentPosition[0] > bricks[i].x && ballCurrentPosition[0] < bricks[i].bottomRightup[0]) &&
-            ((ballCurrentPosition[1] + ballDiameter) > blocks[i].bottomLeft[1] && ballCurrentPosition[1] < blocks[i].topLeft[1])
+            (ballCurrentPosition[0] > bricks[i].x && ballCurrentPosition[0] < bricks[i].x + brickWidth) &&
+            ((ballCurrentPosition[1] + 20) > bricks[i].y && ballCurrentPosition[1] < bricks[i].y + brickHeight)
         )
         {
-            const allBlocks = Array.from(document.querySelectorAll('.block'))
-            allBlocks[i].classList.remove('block')
-            blocks.splice(i,1)
-            changeDirection()
-            score++
-            scoreDisplay.innerHTML = score
-            if (blocks.length == 0) {
+            const allBlocks = Array.from(document.querySelectorAll('.brick'))
+            allBlocks[i].classList.remove('brick')
+            bricks.splice(i,1)
+            ballDirectionY *= -1;
+            ballDirectionX *= -1;
+            scoreDisplay++
+            scoreDisplay.innerHTML = scoreDisplay
+            if (bricks.length === 0) {
                 scoreDisplay.innerHTML = 'You Win!'
-                clearInterval(timerId)
                 document.removeEventListener('keydown', moveUser)
             }
         }
