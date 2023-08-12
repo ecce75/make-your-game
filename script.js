@@ -16,6 +16,7 @@ let score;
 let startTime;
 let intervalId;
 let timerPaused = false;
+let pausedTime = 0;
 
 
 class Brick {
@@ -97,6 +98,7 @@ function pauseTimer() {
 function resetTimer() {
     startTime = null;
     timerPaused = false;
+    pausedTime = 0;
     clearInterval(intervalId);
     timerDisplay.textContent = 'Time: 00:00.000';
 }
