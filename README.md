@@ -13,3 +13,7 @@ open index.html
 Enjoy!
 
 #### Made by jpurdepr and Ekke
+
+## DEMO GIF
+
+![Alt Text](arkanoid.gif)
