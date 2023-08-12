@@ -18,9 +18,8 @@ h1 {
 
 #instructions {
     position: absolute;
-    top: 50%; /* Adjust vertically as needed */
+    top: 9.3%; /* Adjust vertically as needed */
     left: 750px; /* Adjust horizontally as needed */
-    transform: translateY(-271%);
     background-color: rgb(40, 41, 66);
     color: white;
     padding: 10px;
@@ -71,7 +70,7 @@ h1 {
     margin: 0 10px;
 }
 
-#pause-menu, #win-menu{
+#pause-menu, #win-menu, #game-over-menu{
     margin-left: 8px;
     margin-top: 90px;
     display: flex;
@@ -86,7 +85,7 @@ h1 {
     z-index: 100; /* Ensure the pause menu is above other elements */
 }
 
-#menu-content {
+.menu-content {
     background-color: #d6dcff;
     padding: 20px;
     border-radius: 5px;

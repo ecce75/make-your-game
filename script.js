@@ -3,14 +3,20 @@ const gameBoard = document.getElementById('game-board');
 const paddle = document.getElementById('paddle');
 const ball = document.getElementById('ball');
 let scoreDisplay = document.getElementById('score');
-const livesDisplay = document.getElementById('lives');
-const timerDisplay = document.getElementById('timer');
+let livesDisplay = document.getElementById('lives');
+let timerDisplay = document.getElementById('timer');
 
 let gameOver = true;
 let isPaused = true;
 let start = true;
-let lives = 3;
-let score = 0;
+let lives ;
+let score;
+
+//timer display
+let startTime;
+let intervalId;
+let timerPaused = false;
+
 
 class Brick {
     color;
@@ -21,7 +27,7 @@ class Brick {
 }
 const brickWidth = 119;
 const brickHeight = 30;
-const bricks = [];
+let bricks = [];
 
 const ballStart = [360, 399]
 let ballCurrentPosition = ballStart
@@ -29,8 +35,8 @@ let ballDirectionX = 1;
 let ballDirectionY = -1;
 let ballSpeed = 2;
 
-const userStart = [313, 410]
-let paddleCurrentPosition = userStart
+const paddleStart = [313, 410]
+let paddleCurrentPosition = paddleStart
 
 let previousTime = performance.now();
 let pauseTime = null;
@@ -45,6 +51,7 @@ document.addEventListener('keydown', (event) => {
         resetGame();
     } else if (event.key === ' ' || event.key === 'Space') {
         if (gameOver === true) {
+            document.getElementById('game-over-menu').classList.add('hidden');
             initializeGame()
             gameOver = false;
         } else {
@@ -52,13 +59,48 @@ document.addEventListener('keydown', (event) => {
                 start = false
                 isPaused = false
             }else {
-                togglePauseMenu('pause-menu');
+                togglePauseMenu('pause-menu'); //pauseTimer() called in togglePauseMenu()
             }
         }
-    } else if (event.key === '-') { ////TESTING WIN
-        togglePauseMenu('win-menu');
     }
 });
+
+function startTimer() {
+    if (!startTime) {
+        startTime = new Date().getTime();
+        intervalId = setInterval(updateTimer, 10); // Update every 10 milliseconds
+    }
+}
+
+function pauseTimer() {
+    timerPaused = !timerPaused;
+    if (!timerPaused) {
+        intervalId = setInterval(updateTimer, 10);
+    } else {
+        clearInterval(intervalId);
+    }
+}
+
+function resetTimer() {
+    startTime = null;
+    timerPaused = false;
+    clearInterval(intervalId);
+    timerDisplay.textContent = 'Time: 00:00.000';
+}
+
+function updateTimer() {
+    if (!timerPaused) {
+      const currentTime = new Date().getTime();
+      const elapsedTime = currentTime - startTime;
+
+      const milliseconds = elapsedTime % 1000;
+      const seconds = Math.floor(elapsedTime / 1000) % 60;
+      const minutes = Math.floor(elapsedTime / 60000);
+
+      timerDisplay.textContent = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    }
+}
+
 function movePaddleLeft() {
     paddleCurrentPosition[0] -= 15;
     if (paddleCurrentPosition[0] < 0) {
@@ -83,6 +125,7 @@ function gameLoop() {
             cancelAnimationFrame(animationFrameId);
         }
     } else {
+        startTimer();
         // Calculate time since last frame
         if (pauseTime !== null) {
             previousTime += performance.now() - pauseTime;
@@ -118,7 +161,6 @@ function update(deltaTime) {
     if (ballCurrentPosition[1] <= 0) {
         ballDirectionY *= -1; // Reverse ball's Y direction
     }
-
     // Handle collisions with paddle
     if (
         ballCurrentPosition[1] + ball.clientHeight >= gameBoard.clientHeight - 40 &&
@@ -164,8 +206,9 @@ function update(deltaTime) {
                 const brickElement = document.getElementsByClassName('brick')[i];
                 brickElement.style.backgroundColor = brick.color;
             } else {
-                allBlocks[i].classList.remove('brick')
-                bricks.splice(i,1)
+                //allBlocks[i].classList.remove('brick');
+                allBlocks[i].remove();
+                bricks.splice(i,1);
             }
 
             if ((Math.abs(deltaY) < brickHeight / 2 + ball.clientHeight / 2) &&
@@ -175,7 +218,7 @@ function update(deltaTime) {
                 ballDirectionX *= -1; // Reverse ball's X direction
             }
             score += 200;
-            scoreDisplay.innerHTML = "Score: " + score.toString()
+            scoreDisplay.innerHTML = "Score: " + score.toString();
             if (bricks.length === 0) {
                 scoreDisplay.innerHTML = 'You Win!'
                 togglePauseMenu('win-menu');
@@ -194,6 +237,7 @@ function update(deltaTime) {
         if (lives <= 0) {
             // Game over logic (to be implemented)
             console.log("Game over!");
+            togglePauseMenu('game-over-menu');
             gameOver = true;
         } else {
             // Reset ball position and direction
@@ -201,7 +245,7 @@ function update(deltaTime) {
             ballCurrentPosition = [360, 399]
             ballDirectionX = 1;
             ballDirectionY = -1;
-            render()
+            render();
             isPaused = true;
         }
     }
@@ -215,15 +259,18 @@ function resetGame() {
     ballDirectionX = 1;
     ballDirectionY = -1;
     score = 0;
-    lives = 3;
+    lives = 5;
     scoreDisplay.innerHTML = "Score: " + score.toString()
     document.getElementById('lives').innerHTML = "Lives: " + lives.toString();
     const brickElements = document.querySelectorAll('.brick');
     brickElements.forEach(brickElement => {
-        brickElement.parentNode.removeChild(brickElement);
+        brickElement.remove();
     });
+    bricks = [];
     renderBricks(generateBricks());
-    render()
+    console.log(bricks);
+    render();
+    resetTimer();
     isPaused = true;
 }
 // Render game elements
@@ -239,7 +286,7 @@ function render() {
 function togglePauseMenu(type) {
     const pauseMenu = document.getElementById(type);
     const isHidden = pauseMenu.classList.contains('hidden');
-    console.log(isHidden)
+    pauseTimer();
     if (isHidden) {
         pauseMenu.classList.remove('hidden');
         isPaused = true; // Pause the game loop
@@ -286,13 +333,15 @@ function renderBricks(bricks) {
 }
 
 function initializeGame() {
-    resetGame()
-    gameLoop()
+    resetGame();
+    gameLoop();
 }
 
+//initializeGame();
 while (gameOver === true)   {
     gameOver = false;
     initializeGame();
 }
+
 
 
