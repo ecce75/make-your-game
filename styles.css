@@ -16,6 +16,21 @@ h1 {
     overflow: hidden;
 }
 
+#instructions {
+    position: absolute;
+    top: 50%; /* Adjust vertically as needed */
+    left: 750px; /* Adjust horizontally as needed */
+    transform: translateY(-271%);
+    background-color: rgb(40, 41, 66);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    width: 170px; /* Adjust width as needed */
+    font-size: large;
+}
+
+
+
 
 #paddle {
     position: absolute;
@@ -72,13 +87,17 @@ h1 {
 }
 
 #menu-content {
-    background-color: white;
+    background-color: #d6dcff;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+
+}
+#menu-content h2, #menu-content p {
+    text-align: center;
 }
 
 /* Hidden class to hide the pause menu initially */
 .hidden {
-    display: none;
+    visibility: hidden;
 }

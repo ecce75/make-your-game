@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <title>Arkanoid</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 </head>
 <body>
 <h1>Arkanoid</h1>
+<div id="instructions">
+    <p>"Space" to Start/Pause</p>
+    <p><i class="fas fa-arrow-left"></i> <i class="fas fa-arrow-right"></i> Move</p>
+    <p>"Enter" to Restart</p>
+</div>
 <div id="game-board">
     <div id="paddle"></div>
     <div id="ball"></div>
-    <!-- Bricks will be dynamically created using JavaScript -->
 </div>
 <div id="hud">
     <div id="lives">Lives: 3</div>
@@ -19,9 +25,8 @@
 </div>
 <div id="pause-menu" class ="hidden">
     <div id="menu-content">
-        <button id="pauseButton">Pause</button>
-        <button id="restartButton">Restart</button>
-        <button id="continueButton">Continue</button>
+        <h2>Game Paused</h2>
+        <p>Press "Space" to Resume</p>
     </div>
 </div>
 <script src="script.js"></script>

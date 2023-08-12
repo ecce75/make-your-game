@@ -11,6 +11,7 @@ let ballDirectionX = 1;
 let ballDirectionY = -1;
 let gameOver = false;
 let isPaused = true;
+let start = true
 
 const userStart = [313, 410]
 let paddleCurrentPosition = userStart
@@ -64,38 +65,6 @@ function gameLoop() {
     }
     animationFrameId = requestAnimationFrame(gameLoop);
 }
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') {
-        movePaddleLeft();
-    } else if (event.key === 'ArrowRight') {
-        movePaddleRight();
-    } else if (event.key === ' ' || event.key === 'Space') {
-        if (gameOver === true) {
-            renderBricks(generateBricks());
-            gameLoop();
-            gameOver = false;
-        } else {
-            isPaused = !isPaused;
-            togglePauseMenu();
-        }
-    }
-});
-function movePaddleLeft() {
-    paddleCurrentPosition[0] -= 15;
-    if (paddleCurrentPosition[0] < 0) {
-        paddleCurrentPosition[0] = 0;
-    }
-}
-
-function movePaddleRight() {
-    paddleCurrentPosition[0] += 15;
-    const maxPosition = gameBoard.clientWidth - paddle.clientWidth;
-    if (paddleCurrentPosition[0] > maxPosition) {
-        paddleCurrentPosition[0] = maxPosition;
-    }
-}
-// Update game state
 function update(deltaTime) {
     ballSpeed *= 1.0003;
 
@@ -161,13 +130,13 @@ function update(deltaTime) {
             }
 
             if ((Math.abs(deltaY) < brickHeight / 2 + ball.clientHeight / 2) &&
-            (Math.abs(deltaX) < brickWidth / 2)) {
+                (Math.abs(deltaX) < brickWidth / 2)) {
                 ballDirectionY *= -1; // Reverse ball's Y direction
             } else {
                 ballDirectionX *= -1; // Reverse ball's X direction
             }
             score += 200;
-            scoreDisplay.innerHTML = score.toString()
+            scoreDisplay.innerHTML = "Score: " + score.toString()
             if (bricks.length === 0) {
                 scoreDisplay.innerHTML = 'You Win!'
                 document.removeEventListener('keydown', gameLoop)
@@ -178,6 +147,7 @@ function update(deltaTime) {
     // Check game over condition
     if (ballCurrentPosition[1] >= gameBoard.clientHeight - ball.clientHeight){
         // Player loses a life
+        start = true;
         ballSpeed = 2;
         lives--;
         document.getElementById('lives').innerHTML = "Lives: " + lives.toString();
@@ -185,22 +155,75 @@ function update(deltaTime) {
             // Game over logic (to be implemented)
             console.log("Game over!");
             gameOver = true;
+            lives = 3;
         } else {
             // Reset ball position and direction
             paddleCurrentPosition = [313, 410]
             ballCurrentPosition = [360, 399]
             ballDirectionX = 1;
             ballDirectionY = -1;
-            console.log(userStart)
-            console.log(ballStart)
             render()
             isPaused = true;
         }
     }
 
 }
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        movePaddleLeft();
+    } else if (event.key === 'ArrowRight') {
+        movePaddleRight();
+    } else if (event.key === 'Enter') {
+        resetGame();
+    } else if (event.key === ' ' || event.key === 'Space') {
+        if (gameOver === true) {
+            renderBricks(generateBricks());
+            gameLoop();
+            gameOver = false;
+        } else {
+            if (start === true) {
+                start = false
+                isPaused = false
+            }else {
+                togglePauseMenu();
+            }
+        }
+    }
+});
+function movePaddleLeft() {
+    paddleCurrentPosition[0] -= 15;
+    if (paddleCurrentPosition[0] < 0) {
+        paddleCurrentPosition[0] = 0;
+    }
+}
+
+function movePaddleRight() {
+    paddleCurrentPosition[0] += 15;
+    const maxPosition = gameBoard.clientWidth - paddle.clientWidth;
+    if (paddleCurrentPosition[0] > maxPosition) {
+        paddleCurrentPosition[0] = maxPosition;
+    }
+}
+// Update game state
 
 
+function resetGame() {
+    paddleCurrentPosition = [313, 410]
+    ballCurrentPosition = [360, 399]
+    ballDirectionX = 1;
+    ballDirectionY = -1;
+    score = 0;
+    lives = 3;
+    scoreDisplay.innerHTML = "Score: " + score.toString()
+    document.getElementById('lives').innerHTML = "Lives: " + lives.toString();
+    const brickElements = document.querySelectorAll('.brick');
+    brickElements.forEach(brickElement => {
+        brickElement.parentNode.removeChild(brickElement);
+    });
+    renderBricks(generateBricks());
+    render()
+    isPaused = true;
+}
 // Render game elements
 function render() {
     // Update paddle's CSS position
@@ -213,11 +236,14 @@ function render() {
 
 function togglePauseMenu() {
     const pauseMenu = document.getElementById('pause-menu');
-    const isHidden = document.getElementsByClassName('hidden').length > 0;
+    const isHidden = pauseMenu.classList.contains('hidden');
     console.log(isHidden)
     if (isHidden) {
+        pauseMenu.classList.remove('hidden');
+        isPaused = true; // Pause the game loop
     } else {
         pauseMenu.classList.add('hidden');
+        isPaused = false; // Resume the game loop
     }
 }
 
@@ -256,8 +282,12 @@ function renderBricks(bricks) {
     ball.style.left = `${ballCurrentPosition[0]}px`;
     ball.style.top = `${ballCurrentPosition[1]}px`;
 }
-renderBricks(generateBricks());
-// Start the game loop
-gameLoop();
+
+function initializeGame() {
+    renderBricks(generateBricks());
+    render();
+}
+
+initializeGame();
 
 
