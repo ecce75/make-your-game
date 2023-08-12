@@ -69,10 +69,11 @@ document.addEventListener('keydown', (event) => {
                 toggleMenu('pause-menu'); //pauseTimer() called in toggleMenu()
             }
         } 
-    } else if (event.key === 'k') {
-        gameOver = true;
-        toggleMenu('win-menu');
-    }
+
+    }// else if (event.key === 'k') {
+     //     gameOver = true;
+     //     toggleMenu('win-menu');
+     // }
 });
 
 function startTimer() {
@@ -83,13 +84,14 @@ function startTimer() {
 }
 
 function pauseTimer() {
-    timerPaused = !timerPaused;
     if (!timerPaused) {
-        intervalId = setInterval(updateTimer, 10);
-    } else {
+        pausedTime = new Date().getTime() - startTime;
         clearInterval(intervalId);
-        timerDisplay.textContent = 'Time: 00:00.000';
+    } else {
+        startTime = new Date().getTime() - pausedTime;
+        intervalId = setInterval(updateTimer, 10);
     }
+    timerPaused = !timerPaused;
 }
 
 function resetTimer() {
