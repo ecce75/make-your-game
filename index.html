@@ -6,17 +6,18 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
+<h1>Arkanoid</h1>
 <div id="game-board">
     <div id="paddle"></div>
     <div id="ball"></div>
     <!-- Bricks will be dynamically created using JavaScript -->
 </div>
 <div id="hud">
-    <div id="score">Score: 0</div>
     <div id="lives">Lives: 3</div>
+    <div id="score">Score: 0</div>
     <div id="timer">Time: 0</div>
 </div>
-<div id="pause-menu">
+<div id="pause-menu" class ="hidden">
     <div id="menu-content">
         <button id="pauseButton">Pause</button>
         <button id="restartButton">Restart</button>

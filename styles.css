@@ -1,43 +1,84 @@
 body {
-    background-color: #282942;
+    background-color: #1A1D3A;
+}
+h1 {
+    text-align: center;
+    color: #d6dcff;
+    margin-top: 30px;
+    width: 720px;
 }
 
 #game-board {
-    width: 560px;
-    height: 300px;
+    width: 720px;
+    height: 450px;
     background-color: black;
     position: relative;
     overflow: hidden;
-    margin-top: 100px;
 }
 
 
 #paddle {
     position: absolute;
     width: 100px;
-    height: 20px;
+    height: 10px;
     background-color: blueviolet;
 }
 
 .brick {
     position: absolute;
-    width: 100px;
-    height: 15px;
+    width: 105px;
+    height: 19px;
 }
 
 #ball {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 10px;
+    height: 10px;
     border-radius: 10px;
     background-color: red;
 }
 
 #hud {
+    display: flex; /* Use Flexbox */
+    align-items: center;
     text-align: center;
     margin-top: 10px;
+    color: #d6dcff;
+    border: #d6dcff 1px solid;
+    width: 720px;
+}
+
+#score, #lives, #timer {
+    margin: 0 101px; /* Add some spacing between items */
 }
 
 #hud span {
     margin: 0 10px;
+}
+
+#pause-menu {
+    margin-left: 8px;
+    margin-top: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 720px;
+    height: 450px;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 100; /* Ensure the pause menu is above other elements */
+}
+
+#menu-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Hidden class to hide the pause menu initially */
+.hidden {
+    display: none;
 }

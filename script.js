@@ -9,18 +9,21 @@ const timerDisplay = document.getElementById('timer');
 const bricks = [];
 let ballDirectionX = 1;
 let ballDirectionY = -1;
+let gameOver = false;
+let isPaused = true;
 
-const userStart = [230, 280]
+const userStart = [313, 410]
 let paddleCurrentPosition = userStart
 
-const ballStart = [270, 40]
+const ballStart = [360, 399]
 let ballCurrentPosition = ballStart
 
-const ballSpeed = 2;
+let ballSpeed = 2;
 let lives = 3;
+let score = 0;
 
-const brickWidth = 110;
-const brickHeight = 20;
+const brickWidth = 119;
+const brickHeight = 30;
 class Brick {
     color;
     constructor(xAxis, yAxis) {
@@ -30,19 +33,36 @@ class Brick {
 }
 
 let previousTime = performance.now();
+let pauseTime = null;
+let animationFrameId;
 // Game loop
 function gameLoop() {
-    const deltaTime = performance.now() - previousTime;
-    previousTime = performance.now();
+    if (isPaused) {
+        if (pauseTime === null) {
+            pauseTime = performance.now();
+            cancelAnimationFrame(animationFrameId);
+        }
+    } else {
+        // Calculate time since last frame
+        if (pauseTime !== null) {
+            previousTime += performance.now() - pauseTime;
+            pauseTime = null;
+        }
+        const deltaTime = performance.now() - previousTime;
+        previousTime = performance.now();
 
-    // Update game state
-    update(deltaTime);
+        // Update game state
+        update(deltaTime);
 
-    // Render game elements
-    render();
+        // Render game elements
+        render();
 
-    // Request the next frame
-    requestAnimationFrame(gameLoop);
+        if (gameOver === true) {
+            cancelAnimationFrame(animationFrameId);
+            return;
+        }
+    }
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 document.addEventListener('keydown', (event) => {
@@ -50,21 +70,26 @@ document.addEventListener('keydown', (event) => {
         movePaddleLeft();
     } else if (event.key === 'ArrowRight') {
         movePaddleRight();
-    } else if (event.key === 'Space') {
-        togglePauseMenu();
+    } else if (event.key === ' ' || event.key === 'Space') {
+        if (gameOver === true) {
+            renderBricks(generateBricks());
+            gameLoop();
+            gameOver = false;
+        } else {
+            isPaused = !isPaused;
+            togglePauseMenu();
+        }
     }
 });
 function movePaddleLeft() {
-    console.log("move left")
-    paddleCurrentPosition[0] -= 10;
+    paddleCurrentPosition[0] -= 15;
     if (paddleCurrentPosition[0] < 0) {
         paddleCurrentPosition[0] = 0;
     }
 }
 
 function movePaddleRight() {
-    console.log("move right")
-    paddleCurrentPosition[0] += 10;
+    paddleCurrentPosition[0] += 15;
     const maxPosition = gameBoard.clientWidth - paddle.clientWidth;
     if (paddleCurrentPosition[0] > maxPosition) {
         paddleCurrentPosition[0] = maxPosition;
@@ -72,6 +97,7 @@ function movePaddleRight() {
 }
 // Update game state
 function update(deltaTime) {
+    ballSpeed *= 1.0003;
 
     // Update ball position
     ballCurrentPosition[0] += ballDirectionX * ballSpeed * deltaTime / 16;
@@ -87,58 +113,92 @@ function update(deltaTime) {
 
     // Handle collisions with paddle
     if (
-        ballCurrentPosition[1] + ball.clientHeight >= gameBoard.clientHeight - paddle.clientHeight &&
+        ballCurrentPosition[1] + ball.clientHeight >= gameBoard.clientHeight - 40 &&
         ballCurrentPosition[0] + ball.clientWidth >= paddleCurrentPosition[0] &&
         ballCurrentPosition[0] <= paddleCurrentPosition[0] + paddle.clientWidth
     ) {
-        console.log("Hit paddle!")
         ballDirectionY *= -1; // Reverse ball's Y direction
+    } else if (ballCurrentPosition[0] + ball.clientWidth >= paddleCurrentPosition[0] &&
+        ballCurrentPosition[0] <= paddleCurrentPosition[0] + paddle.clientWidth &&
+        ballCurrentPosition[1] + ball.clientHeight >= gameBoard.clientHeight - paddle.clientHeight) {
+        ballDirectionX *= -1; // Reverse ball's X direction
     }
 
-    // TODO: Implement collision logic with bricks
     for (let i = 0; i < bricks.length; i++){
+        const brick = bricks[i];
+
+        const ballCenterX = ballCurrentPosition[0] + ball.clientWidth / 2;
+        const ballCenterY = ballCurrentPosition[1] + ball.clientHeight / 2;
+
+        const brickCenterX = brick.x + brickWidth / 2;
+        const brickCenterY = brick.y + brickHeight / 2;
+
+        const deltaX = ballCenterX - brickCenterX;
+        const deltaY = ballCenterY - brickCenterY;
+
         if
         (
-            (ballCurrentPosition[0] > bricks[i].x && ballCurrentPosition[0] < bricks[i].x + brickWidth) &&
-            ((ballCurrentPosition[1] + 20) > bricks[i].y && ballCurrentPosition[1] < bricks[i].y + brickHeight)
-        )
+            // Collision with top or bottom of the brick
+            (Math.abs(deltaY) < brickHeight / 2 + ball.clientHeight / 2) &&
+            (Math.abs(deltaX) < brickWidth / 2)
+            ||
+            // Collision with left or right side of the brick
+            (Math.abs(deltaX) < brickWidth / 2 + ball.clientWidth / 2) &&
+            (Math.abs(deltaY) < brickHeight / 2))
         {
             const allBlocks = Array.from(document.querySelectorAll('.brick'))
-            allBlocks[i].classList.remove('brick')
-            bricks.splice(i,1)
-            ballDirectionY *= -1;
-            ballDirectionX *= -1;
-            scoreDisplay++
-            scoreDisplay.innerHTML = scoreDisplay
+            if (brick.color === "orange"){
+                brick.color = "green"
+                const brickElement = document.getElementsByClassName('brick')[i];
+                brickElement.style.backgroundColor = brick.color;
+            } else if (brick.color === "green"){
+                brick.color = "blue"
+                const brickElement = document.getElementsByClassName('brick')[i];
+                brickElement.style.backgroundColor = brick.color;
+            } else {
+                allBlocks[i].classList.remove('brick')
+                bricks.splice(i,1)
+            }
+
+            if ((Math.abs(deltaY) < brickHeight / 2 + ball.clientHeight / 2) &&
+            (Math.abs(deltaX) < brickWidth / 2)) {
+                ballDirectionY *= -1; // Reverse ball's Y direction
+            } else {
+                ballDirectionX *= -1; // Reverse ball's X direction
+            }
+            score += 200;
+            scoreDisplay.innerHTML = score.toString()
             if (bricks.length === 0) {
                 scoreDisplay.innerHTML = 'You Win!'
-                document.removeEventListener('keydown', moveUser)
+                document.removeEventListener('keydown', gameLoop)
             }
         }
     }
 
     // Check game over condition
-    if (ballCurrentPosition[1] >= gameBoard.clientHeight - ball.clientHeight) {
+    if (ballCurrentPosition[1] >= gameBoard.clientHeight - ball.clientHeight){
         // Player loses a life
+        ballSpeed = 2;
         lives--;
+        document.getElementById('lives').innerHTML = "Lives: " + lives.toString();
         if (lives <= 0) {
             // Game over logic (to be implemented)
             console.log("Game over!");
-            throw new Error();
+            gameOver = true;
         } else {
             // Reset ball position and direction
-            ballCurrentPosition[0] = gameBoard.clientWidth / 2 - ball.clientWidth / 2;
-            ballCurrentPosition[1] = gameBoard.clientHeight / 2 - ball.clientHeight / 2;
+            paddleCurrentPosition = [313, 410]
+            ballCurrentPosition = [360, 399]
             ballDirectionX = 1;
             ballDirectionY = -1;
+            console.log(userStart)
+            console.log(ballStart)
+            render()
+            isPaused = true;
         }
     }
 
 }
-
-
-
-
 
 
 // Render game elements
@@ -146,37 +206,35 @@ function render() {
     // Update paddle's CSS position
     paddle.style.left = `${paddleCurrentPosition[0]}px`;
     paddle.style.top = `${paddleCurrentPosition[1]}px`;
-    console.log(paddle.style.left, paddle.style.top)
     // Update ball's CSS position
     ball.style.left = `${ballCurrentPosition[0]}px`;
     ball.style.top = `${ballCurrentPosition[1]}px`;
-
-    // Update HUD elements
-    // Update score, lives, timer display
 }
 
 function togglePauseMenu() {
-
-    // Pause the game loop
-    // Render pause menu
-    // Add event listener for resume button
-    // Resume the game loop
+    const pauseMenu = document.getElementById('pause-menu');
+    const isHidden = document.getElementsByClassName('hidden').length > 0;
+    console.log(isHidden)
+    if (isHidden) {
+    } else {
+        pauseMenu.classList.add('hidden');
+    }
 }
-
-// Keyboard controls
 
 function generateBricks() {
 //     // Generate bricks
     const brickRows = 4;
-    const brickColumns = 5;
+    const brickColumns = 6;
     const brickGap = 10;
     for (let i = 0; i < brickRows; i++) {
         for (let j = 0; j < brickColumns; j++) {
             let brick = new Brick(j * (brickWidth) + brickGap, i * (brickHeight) + brickGap);
-            if (i === 0 || i === 1){
+            if (i === 3){
+                brick.color = "orange";
+            } else if (i === 2){
+                brick.color = "green";
+            } else if (i <= 1){
                 brick.color = "blue";
-            } else if (i >= 2){
-                brick.color = "white";
             }
             bricks.push(brick);
         }
@@ -192,7 +250,14 @@ function renderBricks(bricks) {
         brickElement.style.backgroundColor = brick.color;
         gameBoard.appendChild(brickElement);
     });
+
+    paddle.style.left = `${paddleCurrentPosition[0]}px`;
+    paddle.style.top = `${paddleCurrentPosition[1]}px`;
+    ball.style.left = `${ballCurrentPosition[0]}px`;
+    ball.style.top = `${ballCurrentPosition[1]}px`;
 }
 renderBricks(generateBricks());
 // Start the game loop
 gameLoop();
+
+
