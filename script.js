@@ -48,8 +48,15 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'ArrowRight') {
         movePaddleRight();
     } else if (event.key === 'Enter') {
+        pauseTimer();
         resetGame();
+        initializeGame();
     } else if (event.key === ' ' || event.key === 'Space') {
+        if (!document.getElementById('win-menu').classList.contains('hidden')) {
+            document.getElementById('win-menu').classList.add('hidden');
+            document.getElementById('pause-menu').classList.add('hidden');
+            resetGame();
+        }
         if (gameOver === true) {
             document.getElementById('game-over-menu').classList.add('hidden');
             initializeGame()
@@ -59,9 +66,12 @@ document.addEventListener('keydown', (event) => {
                 start = false
                 isPaused = false
             }else {
-                togglePauseMenu('pause-menu'); //pauseTimer() called in togglePauseMenu()
+                toggleMenu('pause-menu'); //pauseTimer() called in toggleMenu()
             }
-        }
+        } 
+    } else if (event.key === 'k') {
+        gameOver = true;
+        toggleMenu('win-menu');
     }
 });
 
@@ -78,6 +88,7 @@ function pauseTimer() {
         intervalId = setInterval(updateTimer, 10);
     } else {
         clearInterval(intervalId);
+        timerDisplay.textContent = 'Time: 00:00.000';
     }
 }
 
@@ -221,8 +232,8 @@ function update(deltaTime) {
             scoreDisplay.innerHTML = "Score: " + score.toString();
             if (bricks.length === 0) {
                 scoreDisplay.innerHTML = 'You Win!'
-                togglePauseMenu('win-menu');
-                document.removeEventListener('keydown', gameLoop)
+                toggleMenu('win-menu');
+                //document.removeEventListener('keydown', gameLoop)
             } 
         }
     }
@@ -237,7 +248,7 @@ function update(deltaTime) {
         if (lives <= 0) {
             // Game over logic (to be implemented)
             console.log("Game over!");
-            togglePauseMenu('game-over-menu');
+            toggleMenu('game-over-menu');
             gameOver = true;
         } else {
             // Reset ball position and direction
@@ -254,6 +265,7 @@ function update(deltaTime) {
 
 
 function resetGame() {
+    //timerDisplay.textContent = '<%RESET%>';
     paddleCurrentPosition = [313, 410]
     ballCurrentPosition = [360, 399]
     ballDirectionX = 1;
@@ -268,7 +280,6 @@ function resetGame() {
     });
     bricks = [];
     renderBricks(generateBricks());
-    console.log(bricks);
     render();
     resetTimer();
     isPaused = true;
@@ -283,7 +294,7 @@ function render() {
     ball.style.top = `${ballCurrentPosition[1]}px`;
 }
 
-function togglePauseMenu(type) {
+function toggleMenu(type) {
     const pauseMenu = document.getElementById(type);
     const isHidden = pauseMenu.classList.contains('hidden');
     pauseTimer();
@@ -333,6 +344,8 @@ function renderBricks(bricks) {
 }
 
 function initializeGame() {
+    const winMenu = document.getElementById("win-menu");
+    winMenu.classList.add('hidden');
     resetGame();
     gameLoop();
 }
