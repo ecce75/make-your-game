@@ -49,7 +49,6 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'ArrowRight') {
         movePaddleRight();
     } else if (event.key === 'Enter') {
-        pauseTimer();
         resetGame();
         initializeGame();
     } else if (event.key === ' ' || event.key === 'Space') {
@@ -80,6 +79,7 @@ document.addEventListener('keydown', (event) => {
 function startTimer() {
     if (!startTime) {
         startTime = new Date().getTime();
+        timerPaused = false;
         intervalId = setInterval(updateTimer, 10); // Update every 10 milliseconds
     }
 }
