@@ -71,7 +71,7 @@ h1 {
     margin: 0 10px;
 }
 
-#pause-menu {
+#pause-menu, #win-menu{
     margin-left: 8px;
     margin-top: 90px;
     display: flex;

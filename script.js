@@ -53,9 +53,11 @@ document.addEventListener('keydown', (event) => {
                 start = false
                 isPaused = false
             }else {
-                togglePauseMenu();
+                togglePauseMenu('pause-menu');
             }
         }
+    } else if (event.key === '-') { ////TESTING WIN
+        togglePauseMenu('win-menu');
     }
 });
 function movePaddleLeft() {
@@ -177,8 +179,9 @@ function update(deltaTime) {
             scoreDisplay.innerHTML = "Score: " + score.toString()
             if (bricks.length === 0) {
                 scoreDisplay.innerHTML = 'You Win!'
+                togglePauseMenu('win-menu');
                 document.removeEventListener('keydown', gameLoop)
-            }
+            } 
         }
     }
 
@@ -234,8 +237,8 @@ function render() {
     ball.style.top = `${ballCurrentPosition[1]}px`;
 }
 
-function togglePauseMenu() {
-    const pauseMenu = document.getElementById('pause-menu');
+function togglePauseMenu(type) {
+    const pauseMenu = document.getElementById(type);
     const isHidden = pauseMenu.classList.contains('hidden');
     console.log(isHidden)
     if (isHidden) {
