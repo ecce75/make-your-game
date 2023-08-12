@@ -45,8 +45,7 @@ document.addEventListener('keydown', (event) => {
         resetGame();
     } else if (event.key === ' ' || event.key === 'Space') {
         if (gameOver === true) {
-            renderBricks(generateBricks());
-            gameLoop();
+            initializeGame()
             gameOver = false;
         } else {
             if (start === true) {
@@ -91,17 +90,17 @@ function gameLoop() {
         }
         const deltaTime = performance.now() - previousTime;
         previousTime = performance.now();
-
+        if (gameOver === true) {
+            cancelAnimationFrame(animationFrameId);
+            return;
+        }
         // Update game state
         update(deltaTime);
 
         // Render game elements
         render();
 
-        if (gameOver === true) {
-            cancelAnimationFrame(animationFrameId);
-            return;
-        }
+
     }
     animationFrameId = requestAnimationFrame(gameLoop);
 }
@@ -287,7 +286,7 @@ function renderBricks(bricks) {
 }
 
 function initializeGame() {
-    renderBricks(generateBricks());
+    resetGame()
     gameLoop()
 }
 
