@@ -6,25 +6,12 @@ let scoreDisplay = document.getElementById('score');
 const livesDisplay = document.getElementById('lives');
 const timerDisplay = document.getElementById('timer');
 
-const bricks = [];
-let ballDirectionX = 1;
-let ballDirectionY = -1;
-let gameOver = false;
+let gameOver = true;
 let isPaused = true;
-let start = true
-
-const userStart = [313, 410]
-let paddleCurrentPosition = userStart
-
-const ballStart = [360, 399]
-let ballCurrentPosition = ballStart
-
-let ballSpeed = 2;
+let start = true;
 let lives = 3;
 let score = 0;
 
-const brickWidth = 119;
-const brickHeight = 30;
 class Brick {
     color;
     constructor(xAxis, yAxis) {
@@ -32,10 +19,61 @@ class Brick {
         this.y = yAxis;
     }
 }
+const brickWidth = 119;
+const brickHeight = 30;
+const bricks = [];
+
+const ballStart = [360, 399]
+let ballCurrentPosition = ballStart
+let ballDirectionX = 1;
+let ballDirectionY = -1;
+let ballSpeed = 2;
+
+const userStart = [313, 410]
+let paddleCurrentPosition = userStart
 
 let previousTime = performance.now();
 let pauseTime = null;
 let animationFrameId;
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        movePaddleLeft();
+    } else if (event.key === 'ArrowRight') {
+        movePaddleRight();
+    } else if (event.key === 'Enter') {
+        resetGame();
+    } else if (event.key === ' ' || event.key === 'Space') {
+        if (gameOver === true) {
+            renderBricks(generateBricks());
+            gameLoop();
+            gameOver = false;
+        } else {
+            if (start === true) {
+                start = false
+                isPaused = false
+            }else {
+                togglePauseMenu();
+            }
+        }
+    }
+});
+function movePaddleLeft() {
+    paddleCurrentPosition[0] -= 15;
+    if (paddleCurrentPosition[0] < 0) {
+        paddleCurrentPosition[0] = 0;
+    }
+}
+
+function movePaddleRight() {
+    paddleCurrentPosition[0] += 15;
+    const maxPosition = gameBoard.clientWidth - paddle.clientWidth;
+    if (paddleCurrentPosition[0] > maxPosition) {
+        paddleCurrentPosition[0] = maxPosition;
+    }
+}
+// Update game state
+
 // Game loop
 function gameLoop() {
     if (isPaused) {
@@ -155,7 +193,6 @@ function update(deltaTime) {
             // Game over logic (to be implemented)
             console.log("Game over!");
             gameOver = true;
-            lives = 3;
         } else {
             // Reset ball position and direction
             paddleCurrentPosition = [313, 410]
@@ -168,43 +205,6 @@ function update(deltaTime) {
     }
 
 }
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') {
-        movePaddleLeft();
-    } else if (event.key === 'ArrowRight') {
-        movePaddleRight();
-    } else if (event.key === 'Enter') {
-        resetGame();
-    } else if (event.key === ' ' || event.key === 'Space') {
-        if (gameOver === true) {
-            renderBricks(generateBricks());
-            gameLoop();
-            gameOver = false;
-        } else {
-            if (start === true) {
-                start = false
-                isPaused = false
-            }else {
-                togglePauseMenu();
-            }
-        }
-    }
-});
-function movePaddleLeft() {
-    paddleCurrentPosition[0] -= 15;
-    if (paddleCurrentPosition[0] < 0) {
-        paddleCurrentPosition[0] = 0;
-    }
-}
-
-function movePaddleRight() {
-    paddleCurrentPosition[0] += 15;
-    const maxPosition = gameBoard.clientWidth - paddle.clientWidth;
-    if (paddleCurrentPosition[0] > maxPosition) {
-        paddleCurrentPosition[0] = maxPosition;
-    }
-}
-// Update game state
 
 
 function resetGame() {
@@ -285,9 +285,12 @@ function renderBricks(bricks) {
 
 function initializeGame() {
     renderBricks(generateBricks());
-    render();
+    gameLoop()
 }
 
-initializeGame();
+while (gameOver === true)   {
+    gameOver = false;
+    initializeGame();
+}
 
 
